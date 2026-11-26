@@ -1,0 +1,5 @@
+FRONT-END: Anexo 1 site(1).zip — site/index.html + site/style.css + imagens.
+LÓGICA + HARDWARE: Anexo 2 Varal_R5E_Integrado.zip — src/main.cpp + include/config.h + API /api/status, /api/eventos, /api/cmd.
+FIREBASE E PREVISÃO ONLINE: Não utilizados. Não há temperatura, vento nem histórico de semanas na API local.
+SEGURANÇA: controles principais desabilitados quando ESP32 offline; parada via navegador não é corte físico.
+Esta versão mantém os valores/nomes internos de revisão R5E no firmware, já compilado e gravado pelo usuário. R5F refere-se apenas à unificação da interface.

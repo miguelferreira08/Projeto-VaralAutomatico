@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Varal Inteligente | ESP32 · R5F</title>
+<!-- Configurações PWA -->
+<link href="./manifest.json" rel="manifest"/>
+<meta content="#0b1120" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<link href="./icons/varal-192.png" rel="apple-touch-icon"/>
+<link href="./icons/varal-192.png" rel="icon" type="image/png"/>
+<!-- Fontes Google (Inter & JetBrains Mono para dados técnicos) -->
+
+
+
+<!-- Ícones Lucide -->
+
+<link href="./style.css" rel="stylesheet"/>
+<script defer="" src="./icons.js"></script><script defer="" src="./script.js"></script></head>
+<body>
+<div class="bg-glow"></div>
+<div class="app-container">
+<!-- Cabeçalho Profissional -->
+<header class="app-header">
+<div class="brand">
+<div class="logo-badge">
+<i data-lucide="cloud-sun-rain"></i>
+</div>
+<div>
+<h1>Varal Inteligente <span class="badge-esp">ESP32</span></h1>
+<p class="subtitle">Controle local · Sensor de chuva e fins de curso</p>
+</div>
+</div>
+<div class="header-actions">
+<button class="btn-install hidden" id="btn-install-pwa" title="Instalar Aplicativo">
+<i data-lucide="download"></i>
+<span>Instalar App</span>
+</button>
+<div class="connection-pill" id="connection-badge">
+<span class="pulse-dot"></span>
+<span id="connection-text">Aguardando ESP32...</span>
+</div>
+</div>
+</header>
+<!-- Grid Principal -->
+<main class="dashboard-grid">
+<!-- Card 1: Meteorologia & Clima Local -->
+<section class="card weather-card">
+<div class="card-header">
+<span class="card-title"><i data-lucide="cloud-rain"></i> Ambiente · Sensor de chuva</span>
+<span class="update-time" id="weather-updated">Sem dados recentes</span>
+</div>
+<div class="weather-main">
+<div class="temp-display">
+<span class="temp-value" id="temp">--</span>
+<span class="temp-unit">s</span>
+</div>
+<div class="weather-info">
+<div class="weather-condition" id="weather-desc">Aguardando leitura local</div>
+<div class="weather-metrics">
+<span class="metric-pill rain-pill">
+<i data-lucide="droplets"></i> Chuva: <strong id="rain-prob">--</strong>
+</span>
+<span class="metric-pill">
+<i data-lucide="cpu"></i> Motor: <strong id="wind-speed">--</strong>
+</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Card 2: Controle Principal & Telemetria do Varal -->
+<section class="card control-card">
+<div class="card-header">
+<span class="card-title"><i data-lucide="cpu"></i> Controle do Varal</span>
+<span class="mode-tag manual paused" id="mode-badge">PAUSADO</span>
+</div>
+<!-- Visualizador de Estado -->
+<div class="status-grid">
+<div class="status-box" id="box-varal">
+<div class="status-icon">
+<i data-lucide="shirt"></i>
+</div>
+<div class="status-content">
+<span class="status-label">Posição Atual</span>
+<span class="status-value" id="varal-status">Sem conexão</span>
+</div>
+</div>
+<div class="status-box" id="box-sensor">
+<div class="status-icon">
+<i data-lucide="cloud-rain"></i>
+</div>
+<div class="status-content">
+<span class="status-label">Sensor de Chuva</span>
+<span class="status-value" id="sensor-status">--</span>
+</div>
+</div>
+</div>
+<!-- Barra Visual de Posição -->
+<div class="position-visualizer">
+<div class="visualizer-labels">
+<span>Recolhido (0%)</span>
+<span id="visualizer-percent">--</span>
+<span>Estendido (100%)</span>
+</div>
+<div class="progress-track">
+<div class="progress-fill" id="varal-progress" style="width: 0%;"></div>
+</div>
+</div>
+<!-- Botão de Acionamento Principal -->
+<button class="btn-primary-action" disabled="" id="btn-toggle-varal"><i class="spin" data-lucide="loader-2"></i><span>Aguardando ESP32...</span></button><div class="control-actions"><button class="btn-stop" disabled="" id="btn-stop" type="button"><i data-lucide="square"></i> PARAR / PAUSAR</button><button class="btn-clear-fault" disabled="" id="btn-clear-fault" type="button"><i data-lucide="rotate-ccw"></i> LIMPAR FALHA</button></div><p aria-live="polite" class="command-feedback" id="command-feedback" role="status">Sem conexão com a ESP32.</p><p class="safety-note">O comando PARAR pelo site não substitui o corte físico de alimentação do motor.</p>
+<!-- Configurações Rápidas (Switches) -->
+<div class="settings-list">
+<label class="switch-row" for="check-auto">
+<div class="switch-info">
+<span class="switch-title">Funcionamento automático</span>
+<span class="switch-desc">Recolhe com chuva e estende após 60 segundos secos</span>
+</div>
+<div class="toggle-switch">
+<input disabled="" id="check-auto" type="checkbox"/>
+<span class="slider"></span>
+</div>
+</label>
+</div>
+</section>
+<!-- Card 3: Estatísticas e Eficiência de Secagem -->
+<section class="card stats-card">
+<div class="card-header">
+<span class="card-title"><i data-lucide="bar-chart-3"></i> Telemetria da sessão</span>
+<span class="card-subtitle">Desde a inicialização</span>
+</div>
+<div class="stats-highlight">
+<div class="stat-item open-stat">
+<span class="stat-label">Varal Estendido</span>
+<span class="stat-number" id="tempo-aberto-24h">--</span>
+</div>
+<div class="stat-divider"></div>
+<div class="stat-item closed-stat">
+<span class="stat-label">Varal Recolhido</span>
+<span class="stat-number" id="tempo-fechado-24h">--</span>
+</div>
+</div>
+<div class="history-table">
+<div class="history-row">
+<div class="history-period">
+<i data-lucide="calendar"></i>
+<span>Acionamentos e motor</span>
+</div>
+<div class="history-values">
+<span class="tag-green" id="sem-atual-aberto">--</span>
+<span class="tag-amber" id="sem-atual-fechado">--</span>
+</div>
+</div>
+<div class="history-row">
+<div class="history-period">
+<i data-lucide="history"></i>
+<span>Fins de curso</span>
+</div>
+<div class="history-values">
+<span class="tag-green" id="sem-ant-aberto">FC1: --</span>
+<span class="tag-amber" id="sem-ant-fechado">FC2: --</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Card 4: Registro de Atividades Recentes -->
+<section class="card logs-card">
+<div class="card-header">
+<span class="card-title"><i data-lucide="activity"></i> Histórico da ESP32</span>
+<button class="btn-text" id="btn-clear-logs">Limpar</button>
+</div>
+<ul class="event-log-list" id="event-logs">
+<li class="log-empty">Aguardando eventos da ESP32...</li>
+</ul>
+</section>
+</main>
+</div>
+<!-- Toast de Notificação -->
+<div class="toast-container" id="toast-container"></div>
+<!-- Scripts -->
+
+
+</body>
+</html>
