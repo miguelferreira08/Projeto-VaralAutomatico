@@ -1,6 +1,6 @@
 // R5F: cache apenas de recursos estáticos; NUNCA interceptar chamadas de /api/.
-const CACHE = 'varal-r5f-ui-1';
-const STATIC = ['./','./index.html','./style.css','./script.js','./icons.js','./manifest.json','./icons/varal-192.png','./icons/varal-512.png'];
+const CACHE = 'varal-r5g-ui-1';
+const STATIC = ['./','./index.html','./style.css','./script.js','./icons.js','./manifest.json','./icons/varal-192.png','./icons/varal-512.png','./img/logo-site.png','./img/logo-app.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC))); self.skipWaiting(); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))); self.clients.claim(); });
 self.addEventListener('fetch', e => {

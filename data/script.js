@@ -1,5 +1,5 @@
 // R5E: integracao real do site enviado pelo usuario com HTTP local da ESP32.
-// Sem Firebase, sem conexao com internet; todo comando recebe resposta da ESP32.
+// Controle local preservado: a ESP32 espelha status no Firebase quando configurada.
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);

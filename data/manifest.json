@@ -1,7 +1,7 @@
 {
-  "name": "Varal Inteligente ESP32 — Controle Local",
+  "name": "Varal Inteligente — ESP32 + Firebase",
   "short_name": "Varal IoT",
-  "description": "Painel local de controle e telemetria do varal com ESP32",
+  "description": "Varal automático: controle local pela ESP32 e monitoramento Firebase opcional",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

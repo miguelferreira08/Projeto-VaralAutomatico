@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "dispositivos": {
+      "varal-01": {
+        ".read": "auth != null && (auth.uid === 'UID_PROPRIETARIO' || auth.uid === 'UID_ESP32')",
+        "status": {
+          ".write": "auth != null && auth.uid === 'UID_ESP32'"
+        },
+        "eventos": {
+          ".write": "auth != null && auth.uid === 'UID_ESP32'"
+        }
+      }
+    },
+    "varal": {
+      ".read": "auth != null && (auth.uid === 'UID_PROPRIETARIO' || auth.uid === 'UID_ESP32')",
+      ".write": "auth != null && auth.uid === 'UID_ESP32'"
+    }
+  }
+}

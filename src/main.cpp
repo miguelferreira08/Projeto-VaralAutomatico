@@ -3,8 +3,10 @@
 #include <WebServer.h>
 #include <LittleFS.h>
 #include "config.h"
+#include "secrets.h"
+#include "firebase_cloud.h"
 
-// R5E: seguranca principal independente do navegador e da rede.
+// R5G: seguranca principal independente do navegador e da rede.
 // O motor NAO deve ser alimentado ate validar 3V3, relés, endstops,
 // polaridades e sentido de movimento. Uso escolar supervisionado.
 
@@ -71,7 +73,7 @@ void registrar(const String& texto) {
   e.texto = texto;
   posProximo = (posProximo + 1) % MAX_EVENTOS;
   if (quantidadeEventos < MAX_EVENTOS) quantidadeEventos++;
-  Serial.println("[R5E] " + texto);
+  Serial.println("[R5G] " + texto);
 }
 
 const char* nomeModo() {
@@ -230,11 +232,11 @@ void respostaComando(int code, bool ok, const String& msg) {
                ",\"msg\":\"" + jsonEsc(msg) + "\"}");
 }
 
-void apiStatus() {
+String construirStatusJson() {
   uint32_t agora = millis();
   uint32_t secoMs = (!chuva.ativo && secoDesde != 0) ? (uint32_t)(agora - secoDesde) : 0;
   String out; out.reserve(540);
-  out += "{\"revisao\":\"R5E\",\"chuva\":";
+  out += "{\"revisao\":\"R5G\",\"chuva\":";
   out += chuva.ativo ? "true" : "false";
   out += ",\"limite_recolhido\":"; out += fcRec.ativo ? "true" : "false";
   out += ",\"limite_estendido\":"; out += fcEst.ativo ? "true" : "false";
@@ -251,11 +253,19 @@ void apiStatus() {
   out += ",\"uptime_ms\":"; out += String(agora);
   out += ",\"event_seq\":"; out += String(sequenciaEventos);
   out += ",\"tempo_max_ms\":"; out += String(TEMPO_MAX_MOTOR_MS);
-  out += '}';
-  jsonResponse(200, out);
+  out += ",\"hardware_validado\":"; out += HARDWARE_VALIDADO ? "true" : "false";
+#ifndef VARAL_HOST_TEST
+  out += ",\"wifi_cliente\":"; out += WiFi.status() == WL_CONNECTED ? "true" : "false";
+  out += ",\"ip_rede\":\""; out += WiFi.status() == WL_CONNECTED ? WiFi.localIP().toString() : String(""); out += "\"";
+#else
+  out += ",\"wifi_cliente\":false,\"ip_rede\":\"\"";
+#endif
+  out += "}";
+  return out;
 }
+void apiStatus() { jsonResponse(200, construirStatusJson()); }
 
-void apiEventos() {
+String construirEventosJson() {
   String out; out.reserve(2200);
   out = "{\"eventos\":[";
   uint8_t primeira = (posProximo + MAX_EVENTOS - quantidadeEventos) % MAX_EVENTOS;
@@ -267,7 +277,21 @@ void apiEventos() {
     out += ",\"texto\":\""; out += jsonEsc(e.texto); out += "\"}";
   }
   out += "]}";
-  jsonResponse(200, out);
+  return out;
+}
+void apiEventos() { jsonResponse(200, construirEventosJson()); }
+
+String construirLegacyJson() {
+  String pos = nomePosicao();
+  String situacao = pos == "estendidas" ? "ABERTO" : pos == "recolhidas" ? "FECHADO" : "INDEFINIDO";
+  String out = String("{\"status\":\"") + situacao + "\",\"posicao\":\"" + pos + "\"";
+  out += ",\"chuva\":"; out += chuva.ativo ? "true" : "false";
+  out += ",\"sensor_chuva\":\""; out += chuva.ativo ? "MOLHADO" : "SECO"; out += "\"";
+  out += ",\"modo_auto\":"; out += modo == Modo::Automatico ? "true" : "false";
+  out += ",\"motor\":\""; out += nomeMotor(); out += "\"";
+  out += ",\"falha\":"; out += falha ? "true" : "false";
+  out += ",\"hardware_validado\":"; out += HARDWARE_VALIDADO ? "true" : "false";
+  out += "}"; return out;
 }
 
 void apiComando() {
@@ -360,13 +384,19 @@ void setup() {
   uint32_t agora = millis();
   secoDesde = chuva.ativo ? 0 : agora;
   ultimoContadorEm = agora;
-  registrar("R5E iniciada em modo PAUSADO");
+  registrar("R5G iniciada em modo PAUSADO");
   if (fcRec.ativo && fcEst.ativo) registrarFalha("Dois fins de curso ativos na inicializacao");
 
   if (!LittleFS.begin(false)) {
     Serial.println("ERRO: LittleFS nao montado. Grave o sistema de arquivos com Upload Filesystem Image.");
   }
+  // AP sempre ativo; STA opcional no Wi-Fi domestico para Firebase e PC Ethernet.
+#ifndef VARAL_HOST_TEST
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.setAutoReconnect(true);
+#else
   WiFi.mode(WIFI_AP);
+#endif
   if (!WiFi.softAP(NOME_WIFI, SENHA_WIFI)) Serial.println("FALHA: ponto de acesso Wi-Fi nao iniciou");
   else { Serial.print("Site do varal: http://"); Serial.println(WiFi.softAPIP()); }
   web.on("/api/status", HTTP_GET, apiStatus);
@@ -374,12 +404,34 @@ void setup() {
   web.on("/api/cmd", HTTP_POST, apiComando);
   web.onNotFound(servirArquivo);
   web.begin();
+#ifndef VARAL_HOST_TEST
+  if (WIFI_CASA_SSID[0]) {
+    WiFi.begin(WIFI_CASA_SSID, WIFI_CASA_SENHA);
+    Serial.println("[Wi-Fi] tentando conectar ao roteador, sem interromper o AP.");
+  }
+#endif
+  iniciarFirebaseCloud();
   registrar("Servidor HTTP iniciado");
 }
 
 void loop() {
   uint32_t agora = millis();
   controle(agora);          // o controle nao depende do navegador aberto
-  web.handleClient();      // interface local: 192.168.4.1
+  web.handleClient();      // interface local: 192.168.4.1 e, se configurado, IP do roteador
+#ifndef VARAL_HOST_TEST
+  static bool wifiCasaAntes = false;
+  bool wifiCasaAgora = WiFi.status() == WL_CONNECTED;
+  if (wifiCasaAgora && !wifiCasaAntes) {
+    Serial.print("[Wi-Fi] Acesse tambem pelo roteador: http://");
+    Serial.println(WiFi.localIP().toString());
+  }
+  if (!wifiCasaAgora && wifiCasaAntes) Serial.println("[Wi-Fi] rede domestica desconectada. AP local continua funcionando.");
+  wifiCasaAntes = wifiCasaAgora;
+  static uint32_t ultimoCloud = 0;
+  if ((uint32_t)(agora - ultimoCloud) >= FIREBASE_INTERVALO_MS) {
+    ultimoCloud = agora;
+    enfileirarFirebaseCloud(construirStatusJson(), construirLegacyJson(), construirEventosJson(), sequenciaEventos);
+  }
+#endif
   delay(2);
 }

@@ -1,0 +1,24 @@
+{
+  "name": "Varal Inteligente — Monitoramento Firebase",
+  "short_name": "Varal IoT",
+  "description": "Monitoramento remoto do varal automático por Firebase, autenticado",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "icons": [
+    {
+      "src": "./icons/varal-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/varal-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
