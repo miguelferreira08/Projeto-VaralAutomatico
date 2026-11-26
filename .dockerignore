@@ -1,0 +1,8 @@
+.git
+.pio
+.vscode
+servidor/storage
+servidor/node_modules
+servidor/.env
+include/secrets.h
+*.sqlite*

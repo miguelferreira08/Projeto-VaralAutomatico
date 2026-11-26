@@ -1,4 +1,11 @@
-# NUNCA publicar senhas; mantenha um secrets.h local e privado
+# Credenciais, banco e artefatos de compilacao
 include/secrets.h
+servidor/.env
+servidor/storage/
+servidor/node_modules/
+servidor/credenciais/
 .pio/
 .vscode/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

@@ -1,7 +1,7 @@
 {
-  "name": "Varal Inteligente — Monitoramento Firebase",
+  "name": "Varal Inteligente — Monitoramento",
   "short_name": "Varal IoT",
-  "description": "Monitoramento remoto do varal automático por Firebase, autenticado",
+  "description": "Acompanhamento remoto do varal automático com conta própria e sessão protegida",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

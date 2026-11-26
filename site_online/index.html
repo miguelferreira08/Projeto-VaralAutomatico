@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Varal Inteligente | Firebase · R5G</title>
+<title>Varal Inteligente | Cadastro e monitoramento · R5H</title>
 <!-- Configurações PWA -->
 <link href="./manifest.json" rel="manifest"/>
 <meta content="#0b1120" name="theme-color"/>
@@ -18,7 +18,7 @@
 <!-- Ícones Lucide -->
 
 <link href="./style.css" rel="stylesheet"/>
-<script defer src="./icons.js"></script><script type="module" src="./online.js"></script></head>
+<script src="./config.js"></script><script defer src="./icons.js"></script><script type="module" src="./online.js"></script></head>
 <body>
 <div class="bg-glow"></div>
 <div class="app-container">
@@ -28,7 +28,7 @@
 <div class="logo-badge logo-brand"><img src="./img/logo-site.png" alt="Logo Varal Inteligente" width="48" height="48"/></div>
 <div>
 <h1>Varal Inteligente <span class="badge-esp">ESP32</span></h1>
-<p class="subtitle">Monitoramento remoto · Firebase Realtime Database</p>
+<p class="subtitle">Monitoramento remoto · Status da ESP32</p>
 </div>
 </div>
 <div class="header-actions">
@@ -38,22 +38,28 @@
 </button>
 <div class="connection-pill" id="connection-badge">
 <span class="pulse-dot"></span>
-<span id="connection-text">Aguardando Firebase...</span>
+<span id="connection-text">Aguardando informações...</span>
 </div>
 </div>
 </header>
-<section class="firebase-login card" id="firebase-login">
- <div class="auth-heading"><img src="./img/logo-app.png" alt="Varal Inteligente" width="64" height="64"/><div><h2>Acessar monitoramento</h2><p>Entre com a conta autorizada no Firebase Authentication.</p></div></div>
- <form id="firebase-form" autocomplete="on">
-  <label>E-mail<input type="email" id="firebase-email" autocomplete="username" required placeholder="seu@email.com"></label>
-  <label>Senha<input type="password" id="firebase-password" autocomplete="current-password" required placeholder="Senha da conta Firebase"></label>
-  <button class="btn-login" type="submit" id="firebase-enter">Entrar no Firebase</button>
+<section class="account-login card" id="account-login">
+ <div class="auth-heading"><img src="./img/logo-app.png" alt="Varal Inteligente" width="64" height="64"/><div><h2>Bem-vindo ao Varal Inteligente</h2><p>Entre ou crie sua conta para acompanhar os status do varal.</p></div></div>
+ <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+   <button type="button" role="tab" aria-selected="true" class="auth-tab active" id="tab-entrar">Entrar</button>
+   <button type="button" role="tab" aria-selected="false" class="auth-tab" id="tab-cadastrar">Criar conta</button>
+ </div>
+ <form id="account-form" autocomplete="on">
+  <label>E-mail<input type="email" id="account-email" autocomplete="username" maxlength="254" required placeholder="seu@email.com"></label>
+  <label>Senha<input type="password" id="account-password" autocomplete="current-password" minlength="10" maxlength="128" required placeholder="Sua senha"></label>
+  <label id="confirm-label" class="hidden">Confirmar senha<input type="password" id="account-confirm" autocomplete="new-password" minlength="10" maxlength="128" placeholder="Repita a senha"></label>
+  <button class="btn-login" type="submit" id="account-submit">Entrar</button>
  </form>
- <p role="status" id="firebase-error" class="auth-message"></p>
+ <p class="auth-hint" id="auth-hint">Ainda não tem conta? Selecione “Criar conta”.</p>
+ <p role="status" aria-live="polite" id="account-error" class="auth-message"></p>
 </section>
-<div class="firebase-authbar hidden" id="firebase-authbar"><span id="firebase-user"></span><button type="button" class="btn-logout" id="firebase-logout">Sair</button></div>
+<div class="account-authbar hidden" id="account-authbar"><span id="account-user"></span><button type="button" class="btn-logout" id="account-logout">Sair</button></div>
 <!-- Grid Principal -->
-<main class="dashboard-grid hidden" id="firebase-dashboard">
+<main class="dashboard-grid hidden" id="account-dashboard">
 <!-- Card 1: Meteorologia & Clima Local -->
 <section class="card weather-card">
 <div class="card-header">
@@ -117,7 +123,7 @@
 </div>
 </div>
 <!-- Botão de Acionamento Principal -->
-<button class="btn-primary-action" disabled="" id="btn-toggle-varal"><i class="spin" data-lucide="loader-2"></i><span>Aguardando Firebase...</span></button><div class="control-actions"><button class="btn-stop" disabled="" id="btn-stop" type="button"><i data-lucide="square"></i> PARAR / PAUSAR</button><button class="btn-clear-fault" disabled="" id="btn-clear-fault" type="button"><i data-lucide="rotate-ccw"></i> LIMPAR FALHA</button></div><p aria-live="polite" class="command-feedback" id="command-feedback" role="status">Entre para consultar os status sincronizados pela ESP32.</p><p class="safety-note">Monitoramento remoto somente leitura. Para acionar o motor, utilize o painel local da ESP32 e o corte físico.</p>
+<button class="btn-primary-action" disabled="" id="btn-toggle-varal"><i class="spin" data-lucide="loader-2"></i><span>Aguardando informações...</span></button><div class="control-actions"><button class="btn-stop" disabled="" id="btn-stop" type="button"><i data-lucide="square"></i> PARAR / PAUSAR</button><button class="btn-clear-fault" disabled="" id="btn-clear-fault" type="button"><i data-lucide="rotate-ccw"></i> LIMPAR FALHA</button></div><p aria-live="polite" class="command-feedback" id="command-feedback" role="status">Faça login para consultar os status da ESP32.</p><p class="safety-note">Monitoramento remoto somente leitura. Para acionar o motor, utilize o painel local da ESP32 e o corte físico.</p>
 <!-- Configurações Rápidas (Switches) -->
 <div class="settings-list">
 <label class="switch-row" for="check-auto">

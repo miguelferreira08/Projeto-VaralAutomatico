@@ -1,0 +1,16 @@
+{
+  "name": "varal-r5h-contas",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API de contas propria e monitoramento seguro da ESP32",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}
